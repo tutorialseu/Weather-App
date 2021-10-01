@@ -20,6 +20,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        lifecycleScope.launch{
+            Log.i("JSON", callApiLogin())
+        }
     }
 
     private lateinit var customProgressDialog: Dialog
