@@ -19,5 +19,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
     }
+
+    private lateinit var customProgressDialog: Dialog
+
+    //Todo 5 initialize and show dialog
+    private fun showProgressDialog() {
+        customProgressDialog = Dialog(this)
+        customProgressDialog.setContentView(R.layout.dialog_custom_progress)
+        customProgressDialog.show()
+    }
+
+    //Todo 6 cancel dialog
+    private fun cancelDialog() {
+        customProgressDialog.dismiss()
+    }
+
+
 }
