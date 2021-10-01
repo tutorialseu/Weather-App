@@ -35,6 +35,56 @@ class MainActivity : AppCompatActivity() {
     private fun cancelDialog() {
         customProgressDialog.dismiss()
     }
+    //Todo 7 create a suspend function for the network call
+    suspend fun callApiLogin(): String = withContext(Dispatchers.IO) {
+        var result = ""
+        //Todo 8: show the dialog on ui thread
+        runOnUiThread {
+            showProgressDialog()
+        }
+        var connection: HttpURLConnection? = null
+        try {
+            val url = URL("https://run.mocky.io/v3/553f4a64-3069-4cba-abeb-3131999d57eb")
+            connection = url.openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.doOutput = true
+            val httpResult: Int = connection.responseCode
+            if (httpResult == HttpURLConnection.HTTP_OK) {
+                val inputStream = connection.inputStream
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val stringBuilder = StringBuilder()
+                var line: String?
+                try {
+                    while (reader.readLine().also { line = it } != null) {
+                        stringBuilder.append(line + "\n")
 
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } finally {
+                    try {
+                        inputStream.close()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+                result = stringBuilder.toString()
+            } else {
+                result = connection.responseMessage
+            }
+            //Todo 9: cancel the Dialog on ui thread
+            runOnUiThread {
+                cancelDialog()
+            }
+
+        } catch (e: SocketTimeoutException) {
+            result = "Connection Timeout"
+        } catch (e: IOException) {
+            result = "Error: ${e.message}"
+        } finally {
+            connection?.disconnect()
+        }
+        result
+    }.toString()
 
 }
