@@ -8,6 +8,8 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -21,33 +23,53 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         lifecycleScope.launch{
-            Log.i("JSON", callApiLogin())
+            //Todo retrieve values for each key
+            val result = callApiLogin()
+            val jsonObject = JSONObject(result)
+            val message = jsonObject.optString("message")
+            Log.i("message", message)
+            val userId = jsonObject.optString("user_id")
+            Log.i("user id", userId)
+            val name = jsonObject.optString("name")
+            Log.i("name", name)
+            val profileDetailsObject = jsonObject.optJSONObject("profile_details")
+            val isProfileCompleted = profileDetailsObject.optBoolean("is_profile_completed")
+            Log.i("isProfileCompleted", "$isProfileCompleted")
+            val dataListArray = profileDetailsObject.optJSONArray("data_list")
+            Log.i("Datalist size", name)
+
+            for (item in 0 until dataListArray.length()){
+                Log.i("Value $item", "${dataListArray[item]}")
+                
+                val dataItemObject:JSONObject = dataListArray[item] as JSONObject
+                val id= dataItemObject.optInt("id")
+                Log.i("id", "$id")
+                val value= dataItemObject.optString("value")
+                Log.i("value", "$value")
+            }
+
         }
     }
 
     private lateinit var customProgressDialog: Dialog
 
-    //Todo 5 initialize and show dialog
     private fun showProgressDialog() {
         customProgressDialog = Dialog(this)
         customProgressDialog.setContentView(R.layout.dialog_custom_progress)
         customProgressDialog.show()
     }
 
-    //Todo 6 cancel dialog
     private fun cancelDialog() {
         customProgressDialog.dismiss()
     }
-    //Todo 7 create a suspend function for the network call
     suspend fun callApiLogin(): String = withContext(Dispatchers.IO) {
         var result = ""
-        //Todo 8: show the dialog on ui thread
         runOnUiThread {
             showProgressDialog()
         }
         var connection: HttpURLConnection? = null
         try {
-            val url = URL("https://run.mocky.io/v3/553f4a64-3069-4cba-abeb-3131999d57eb")
+            val url = URL("https://run.mocky.io/v3/90f5b2e6-5ac3-4a59-ace7-c29d990c490a")
             connection = url.openConnection() as HttpURLConnection
             connection.doInput = true
             connection.doOutput = true
@@ -75,7 +97,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 result = connection.responseMessage
             }
-            //Todo 9: cancel the Dialog on ui thread
             runOnUiThread {
                 cancelDialog()
             }
