@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,8 +24,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        lifecycleScope.launch{
-         callApiLogin("Panjutorials","123456")
+        lifecycleScope.launch {
+            val result = callApiLogin()
+            //Todo 3 read data from json using gson
+            val responseData = Gson().fromJson(result, ResponseData::class.java)
+            Log.i("Message", "${responseData.message}")
+            Log.i("Email", "${responseData.email}")
+            Log.i("Mobile", "${responseData.mobile}")
+            Log.i("Is Profile Completed", "${responseData.profile_details.is_profile_completed}")
+            Log.i("Rating", "${responseData.profile_details.rating}")
+            Log.i("Data List Size", "${responseData.data_list.size}")
+            for (item in responseData.data_list.indices) {
+                Log.i("Value $item", "${responseData.data_list[item]}")
+                Log.i("id", "${responseData.data_list[item].id}")
+                Log.i("Value ", "${responseData.data_list[item].value}")
+            }
         }
     }
 
@@ -39,77 +53,18 @@ class MainActivity : AppCompatActivity() {
     private fun cancelDialog() {
         customProgressDialog.dismiss()
     }
-    suspend fun callApiLogin(username: String, password: String): String = withContext(Dispatchers.IO) {
+
+    suspend fun callApiLogin(): String = withContext(Dispatchers.IO) {
         var result = ""
         runOnUiThread {
             showProgressDialog()
         }
         var connection: HttpURLConnection? = null
         try {
-            val url = URL("https://run.mocky.io/v3/90f5b2e6-5ac3-4a59-ace7-c29d990c490a")
+            val url = URL("https://run.mocky.io/v3/e1b48409-8bbc-459c-973d-1b72c56da455")
             connection = url.openConnection() as HttpURLConnection
             connection.doInput = true
             connection.doOutput = true
-
-            /**
-             * Sets whether HTTP redirects should be automatically followed by this instance.
-             * The default value comes from followRedirects, which defaults to true.
-             */
-            connection.instanceFollowRedirects = false
-
-            /**
-             * Set the method for the URL request, one of:
-             *  GET
-             *  POST
-             *  HEAD
-             *  OPTIONS
-             *  PUT
-             *  DELETE
-             *  TRACE
-             *  are legal, subject to protocol restrictions.  The default method is GET.
-             */
-            connection.requestMethod = "POST"
-
-            /**
-             * Sets the general request property. If a property with the key already
-             * exists, overwrite its value with the new value.
-             */
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.setRequestProperty("charset", "utf-8")
-            connection.setRequestProperty("Accept", "application/json")
-
-            /**
-             * Some protocols do caching of documents.  Occasionally, it is important
-             * to be able to "tunnel through" and ignore the caches (e.g., the
-             * "reload" button in a browser).  If the UseCaches flag on a connection
-             * is true, the connection is allowed to use whatever caches it can.
-             *  If false, caches are to be ignored.
-             *  The default value comes from DefaultUseCaches, which defaults to
-             * true.
-             */
-            connection.useCaches = false
-
-            /**
-             * Creates a new data output stream to write data to the specified
-             * underlying output stream. The counter written is set to zero.
-             */
-            val wr = DataOutputStream(connection.outputStream)
-
-            // Create JSONObject Request
-            val jsonRequest = JSONObject()
-            jsonRequest.put("username", username) // Request Parameter 1
-            jsonRequest.put("password", password) // Request Parameter 2
-
-            /**
-             * Writes out the string to the underlying output stream as a
-             * sequence of bytes. Each character in the string is written out, in
-             * sequence, by discarding its high eight bits. If no exception is
-             * thrown, the counter written is incremented by the
-             * length of s.
-             */
-            wr.writeBytes(jsonRequest.toString())
-            wr.flush() // Flushes this data output stream.
-            wr.close() // Closes this output stream and releases any system resources associated with the stream
 
             val httpResult: Int = connection.responseCode
             if (httpResult == HttpURLConnection.HTTP_OK) {
