@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.DataOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -23,31 +24,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         lifecycleScope.launch{
-            //Todo retrieve values for each key
-            val result = callApiLogin()
-            val jsonObject = JSONObject(result)
-            val message = jsonObject.optString("message")
-            Log.i("message", message)
-            val userId = jsonObject.optString("user_id")
-            Log.i("user id", userId)
-            val name = jsonObject.optString("name")
-            Log.i("name", name)
-            val profileDetailsObject = jsonObject.optJSONObject("profile_details")
-            val isProfileCompleted = profileDetailsObject.optBoolean("is_profile_completed")
-            Log.i("isProfileCompleted", "$isProfileCompleted")
-            val dataListArray = profileDetailsObject.optJSONArray("data_list")
-            Log.i("Datalist size", name)
-
-            for (item in 0 until dataListArray.length()){
-                Log.i("Value $item", "${dataListArray[item]}")
-                
-                val dataItemObject:JSONObject = dataListArray[item] as JSONObject
-                val id= dataItemObject.optInt("id")
-                Log.i("id", "$id")
-                val value= dataItemObject.optString("value")
-                Log.i("value", "$value")
-            }
-
+         callApiLogin("Panjutorials","123456")
         }
     }
 
@@ -62,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     private fun cancelDialog() {
         customProgressDialog.dismiss()
     }
-    suspend fun callApiLogin(): String = withContext(Dispatchers.IO) {
+    suspend fun callApiLogin(username: String, password: String): String = withContext(Dispatchers.IO) {
         var result = ""
         runOnUiThread {
             showProgressDialog()
@@ -73,6 +50,67 @@ class MainActivity : AppCompatActivity() {
             connection = url.openConnection() as HttpURLConnection
             connection.doInput = true
             connection.doOutput = true
+
+            /**
+             * Sets whether HTTP redirects should be automatically followed by this instance.
+             * The default value comes from followRedirects, which defaults to true.
+             */
+            connection.instanceFollowRedirects = false
+
+            /**
+             * Set the method for the URL request, one of:
+             *  GET
+             *  POST
+             *  HEAD
+             *  OPTIONS
+             *  PUT
+             *  DELETE
+             *  TRACE
+             *  are legal, subject to protocol restrictions.  The default method is GET.
+             */
+            connection.requestMethod = "POST"
+
+            /**
+             * Sets the general request property. If a property with the key already
+             * exists, overwrite its value with the new value.
+             */
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("charset", "utf-8")
+            connection.setRequestProperty("Accept", "application/json")
+
+            /**
+             * Some protocols do caching of documents.  Occasionally, it is important
+             * to be able to "tunnel through" and ignore the caches (e.g., the
+             * "reload" button in a browser).  If the UseCaches flag on a connection
+             * is true, the connection is allowed to use whatever caches it can.
+             *  If false, caches are to be ignored.
+             *  The default value comes from DefaultUseCaches, which defaults to
+             * true.
+             */
+            connection.useCaches = false
+
+            /**
+             * Creates a new data output stream to write data to the specified
+             * underlying output stream. The counter written is set to zero.
+             */
+            val wr = DataOutputStream(connection.outputStream)
+
+            // Create JSONObject Request
+            val jsonRequest = JSONObject()
+            jsonRequest.put("username", username) // Request Parameter 1
+            jsonRequest.put("password", password) // Request Parameter 2
+
+            /**
+             * Writes out the string to the underlying output stream as a
+             * sequence of bytes. Each character in the string is written out, in
+             * sequence, by discarding its high eight bits. If no exception is
+             * thrown, the counter written is incremented by the
+             * length of s.
+             */
+            wr.writeBytes(jsonRequest.toString())
+            wr.flush() // Flushes this data output stream.
+            wr.close() // Closes this output stream and releases any system resources associated with the stream
+
             val httpResult: Int = connection.responseCode
             if (httpResult == HttpURLConnection.HTTP_OK) {
                 val inputStream = connection.inputStream
