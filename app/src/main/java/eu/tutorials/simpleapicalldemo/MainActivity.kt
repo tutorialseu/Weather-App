@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
         var connection: HttpURLConnection? = null
         try {
-            val url = URL("https://run.mocky.io/v3/90f5b2e6-5ac3-4a59-ace7-c29d990c490a")
+            val url = URL("https://run.mocky.io/v3/e1b48409-8bbc-459c-973d-1b72c56da455")
             connection = url.openConnection() as HttpURLConnection
             connection.doInput = true
             connection.doOutput = true
