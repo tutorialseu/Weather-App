@@ -3,6 +3,10 @@ plugins {
     id 'kotlin-android'
 }
 
+def apikeyPropertiesFile = rootProject.file("apikeys.properties")
+def apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+
 android {
     compileSdk 31
 
@@ -13,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", apikeyProperties['OPEN_WEATHER_MAP'])
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
