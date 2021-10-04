@@ -5,11 +5,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 
-// TODO (STEP 2: Create the activities package and utils package and add the MainActivity class to it and create the constant object in utils.)\
-// START
+
 object Constants {
 
-    // TODO (STEP 3: Add a function to check the network connection is available or not.)
     /**
      * This function is used check the weather the device is connected to the Internet or not.
      */
