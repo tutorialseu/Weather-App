@@ -6,8 +6,11 @@ import android.net.NetworkCapabilities
 import android.os.Build
 
 
+
 object Constants {
 
+    //Todo 4: create a variable to use where the api key is needed
+    const val API_KEY: String = BuildConfig.OPEN_WEATHER_API_KEY
     /**
      * This function is used check the weather the device is connected to the Internet or not.
      */
