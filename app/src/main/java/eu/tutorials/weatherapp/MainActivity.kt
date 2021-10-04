@@ -2,6 +2,7 @@ package eu.tutorials.weatherapp
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -35,10 +36,13 @@ import retrofit.Retrofit
  */
 class MainActivity : AppCompatActivity() {
 
+    // TODO (STEP 4: Create a global variable for ProgressDialog.)
+    // A global variable for the Progress Dialog
+    private var mProgressDialog: Dialog? = null
 
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    // END
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -121,7 +125,6 @@ class MainActivity : AppCompatActivity() {
             val longitude = mLastLocation.longitude
             Log.i("Current Longitude", "$longitude")
 
-            // TODO (STEP 6: Pass the latitude and longitude as parameters in function)
             getLocationWeatherDetails(latitude, longitude)
         }
     }
@@ -134,13 +137,16 @@ class MainActivity : AppCompatActivity() {
 
         if (Constants.isNetworkAvailable(this@MainActivity)) {
 
-            // TODO (STEP 5: Further step for API call)
             /** An invocation of a Retrofit method that sends a request to a web-server and returns a response.
              * Here we pass the required param in the service
              */
             val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
                 latitude, longitude, Constants.METRIC_UNIT, Constants.API_KEY
             )
+            // TODO (STEP 6: Show the progress dialog)
+            // START
+            showCustomProgressDialog() // Used to show the progress dialog
+            // END
 
             // Callback methods are executed using the Retrofit callback executor.
             listCall.enqueue(object : Callback<WeatherResponse> {
@@ -152,8 +158,10 @@ class MainActivity : AppCompatActivity() {
 
                     // Check weather the response is success or not.
                     if (response.isSuccess) {
-
-                        /** The de-serialized response body of a successful response. */
+                        // TODO (STEP 7: Hide the progress dialog)
+                        // START
+                        hideProgressDialog() // Hides the progress dialog
+                        // END
                         val weatherList: WeatherResponse = response.body()
                         Log.i("Response Result", "$weatherList")
                     } else {
@@ -174,6 +182,10 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(t: Throwable) {
+                    // TODO (STEP 8: Hide the progress dialog)
+                    // START
+                    hideProgressDialog() // Hides the progress dialog
+                    // END
                     Log.e("Errorrrrr", t.message.toString())
                 }
             })
@@ -227,4 +239,31 @@ class MainActivity : AppCompatActivity() {
             LocationManager.NETWORK_PROVIDER
         )
     }
+
+
+    // TODO (STEP 5: Create a functions for SHOW and HIDE progress dialog.)
+    // START
+    /**
+     * Method is used to show the Custom Progress Dialog.
+     */
+    private fun showCustomProgressDialog() {
+        mProgressDialog = Dialog(this)
+
+        /*Set the screen content from a layout resource.
+        The resource will be inflated, adding all top-level views to the screen.*/
+        mProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+
+        //Start the dialog and display it on screen.
+        mProgressDialog?.show()
+    }
+
+    /**
+     * This function is used to dismiss the progress dialog if it is visible to user.
+     */
+    private fun hideProgressDialog() {
+        if (mProgressDialog != null) {
+            mProgressDialog!!.dismiss()
+        }
+    }
+    // END
 }

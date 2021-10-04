@@ -5,8 +5,6 @@ import retrofit.GsonConverterFactory
 import retrofit.Retrofit
 
 object RetrofitApi {
-    // TODO (STEP 2: Create the Retrofit builder with GsonConverter.)
-    // START
     /**
      * Add the built-in converter factory first. This prevents overriding its
      * behavior but also ensures correct behavior when using converters that consume all types.
@@ -22,10 +20,7 @@ object RetrofitApi {
         .addConverterFactory(GsonConverterFactory.create())
         /** Create the Retrofit instances. */
         .build()
-    // END
 
-    // TODO (STEP 3:Intialize the Weather service)
-    // START
     /**
      * Here we map the service interface in which we declares the end point and the API type
      *i.e GET, POST and so on along with the request parameter which are required.

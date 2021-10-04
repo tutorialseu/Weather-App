@@ -9,7 +9,6 @@ import android.os.Build
 object Constants {
 
     const val API_KEY: String = BuildConfig.OPEN_WEATHER_API_KEY
-    // TODO (STEP 4: Add Base URL and Metric unit here from openweathermap.)
     const val BASE_URL: String = "http://api.openweathermap.org/data/"
     const val METRIC_UNIT: String = "metric"
     /**
