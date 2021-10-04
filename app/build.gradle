@@ -32,11 +32,11 @@ android {
 }
 
 dependencies {
-    // TODO (STEP 1: As we need to get the current location of device so we need to add this dependency)
+
     // This is for getting the location
     implementation 'com.google.android.gms:play-services-location:18.0.0'
 
-    // TODO (STEP 2: Add the dependency for runtime permission handling)
+
     // Dexter runtime permissions
     // https://github.com/Karumi/Dexter
     implementation 'com.karumi:dexter:6.2.3'

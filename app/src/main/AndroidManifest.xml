@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.tutorials.weatherapp">
-    <!-- TODO (STEP 3: For getting the location we have to define these permissions.)-->
+
     <!-- To access the location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherApp">
-        <!--TODO (STEP 4: Modify the activity tag as per requirement)-->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
