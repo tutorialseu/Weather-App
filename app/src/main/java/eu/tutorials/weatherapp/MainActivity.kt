@@ -29,6 +29,8 @@ import retrofit.Call
 import retrofit.Callback
 import retrofit.Response
 import retrofit.Retrofit
+import java.text.SimpleDateFormat
+import java.util.*
 
 // OpenWeather Link : https://openweathermap.org/api
 /**
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     // A global variable for the Progress Dialog
     private var mProgressDialog: Dialog? = null
-    /** Todo 6:
+    /**
      * Create a viewbinding variable and inflate layout lazily
      * */
     private val binding:ActivityMainBinding by lazy {
@@ -51,7 +53,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       // Todo 7: attach layout to this activity
         setContentView(binding.root)
 
 
@@ -103,7 +104,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-// TODO (STEP 8: We have set the values to the UI and also added some required methods for Unit and Time below.)
     /**
      * Function is used to set the result in the UI elements.
      */
@@ -117,6 +117,16 @@ class MainActivity : AppCompatActivity() {
             binding.tvMainDescription.text = weatherList.weather[z].description
             binding.tvTemp.text =
                 weatherList.main.temp.toString() + getUnit(application.resources.configuration.toString())
+
+            //Todo 2: setup the data with the ui element
+            binding.tvHumidity.text = weatherList.main.humidity.toString() + " per cent"
+            binding.tvMin.text = weatherList.main.temp_min.toString() + " min"
+            binding.tvMax.text = weatherList.main.temp_max.toString() + " max"
+            binding.tvSpeed.text = weatherList.wind.speed.toString()
+            binding.tvName.text = weatherList.name
+            binding.tvCountry.text = weatherList.sys.country
+            binding.tvSunriseTime.text = unixTime(weatherList.sys.sunrise.toLong())
+            binding.tvSunsetTime.text = unixTime(weatherList.sys.sunset.toLong())
         }
     }
 
@@ -132,6 +142,18 @@ class MainActivity : AppCompatActivity() {
         return value
     }
 
+
+    /** Todo 1:
+     * The function is used to get the formatted time based on the Format and the LOCALE we pass to it.
+     */
+    private fun unixTime(timex: Long): String? {
+        val date = Date(timex * 1000L)
+        val sdf =
+            SimpleDateFormat("HH:mm",Locale.UK)
+        sdf.timeZone = TimeZone.getDefault()
+        return sdf.format(date)
+    }
+    // END
     /**
      * A function to request the current location. Using the fused location provider client.
      */
@@ -196,10 +218,7 @@ class MainActivity : AppCompatActivity() {
                         // END
                         val weatherList: WeatherResponse = response.body()
                         Log.i("Response Result", "$weatherList")
-                        // TODO (STEP 9: Call the setup UI method here and pass the response object as a parameter to it to get the individual values.)
-                        // START
                         setupUI(weatherList)
-                        // END
                     } else {
                         // If the response is not success then we check the response code.
                         val sc = response.code()

@@ -34,7 +34,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    //Todo 5 enable viewbinding
     buildFeatures{
         viewBinding true
     }
