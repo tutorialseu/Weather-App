@@ -117,8 +117,6 @@ class MainActivity : AppCompatActivity() {
             binding.tvMainDescription.text = weatherList.weather[z].description
             binding.tvTemp.text =
                 weatherList.main.temp.toString() + getUnit(application.resources.configuration.toString())
-
-            //Todo 2: setup the data with the ui element
             binding.tvHumidity.text = weatherList.main.humidity.toString() + " per cent"
             binding.tvMin.text = weatherList.main.temp_min.toString() + " min"
             binding.tvMax.text = weatherList.main.temp_max.toString() + " max"
@@ -127,6 +125,24 @@ class MainActivity : AppCompatActivity() {
             binding.tvCountry.text = weatherList.sys.country
             binding.tvSunriseTime.text = unixTime(weatherList.sys.sunrise.toLong())
             binding.tvSunsetTime.text = unixTime(weatherList.sys.sunset.toLong())
+
+            //Todo 1  we update the main icon according to the weather
+            when (weatherList.weather[z].icon) {
+                "01d" -> binding.ivMain.setImageResource(R.drawable.sunny)
+                "02d" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "03d" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "04d" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "04n" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "10d" -> binding.ivMain.setImageResource(R.drawable.rain)
+                "11d" -> binding.ivMain.setImageResource(R.drawable.storm)
+                "13d" -> binding.ivMain.setImageResource(R.drawable.snowflake)
+                "01n" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "02n" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "03n" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "10n" -> binding.ivMain.setImageResource(R.drawable.cloud)
+                "11n" -> binding.ivMain.setImageResource(R.drawable.rain)
+                "13n" -> binding.ivMain.setImageResource(R.drawable.snowflake)
+            }
         }
     }
 
@@ -143,7 +159,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    /** Todo 1:
+    /**
      * The function is used to get the formatted time based on the Format and the LOCALE we pass to it.
      */
     private fun unixTime(timex: Long): String? {
