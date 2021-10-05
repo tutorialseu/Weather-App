@@ -22,6 +22,7 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
 import retrofit.Call
@@ -36,16 +37,22 @@ import retrofit.Retrofit
  */
 class MainActivity : AppCompatActivity() {
 
-    // TODO (STEP 4: Create a global variable for ProgressDialog.)
     // A global variable for the Progress Dialog
     private var mProgressDialog: Dialog? = null
+    /** Todo 6:
+     * Create a viewbinding variable and inflate layout lazily
+     * */
+    private val binding:ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
 
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+       // Todo 7: attach layout to this activity
+        setContentView(binding.root)
 
 
         // Initialize the Fused location variable
@@ -96,6 +103,34 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+// TODO (STEP 8: We have set the values to the UI and also added some required methods for Unit and Time below.)
+    /**
+     * Function is used to set the result in the UI elements.
+     */
+    private fun setupUI(weatherList: WeatherResponse) {
+
+        // For loop to get the required data. And all are populated in the UI.
+        for (z in weatherList.weather.indices) {
+            Log.i("NAMEEEEEEEE", weatherList.weather[z].main)
+
+            binding.tvMain.text = weatherList.weather[z].main
+            binding.tvMainDescription.text = weatherList.weather[z].description
+            binding.tvTemp.text =
+                weatherList.main.temp.toString() + getUnit(application.resources.configuration.toString())
+        }
+    }
+
+    /**
+     * Function is used to get the temperature unit value.
+     */
+    private fun getUnit(value: String): String? {
+        Log.i("unitttttt", value)
+        var value = "°C"
+        if ("US" == value || "LR" == value || "MM" == value) {
+            value = "°F"
+        }
+        return value
+    }
 
     /**
      * A function to request the current location. Using the fused location provider client.
@@ -143,10 +178,9 @@ class MainActivity : AppCompatActivity() {
             val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
                 latitude, longitude, Constants.METRIC_UNIT, Constants.API_KEY
             )
-            // TODO (STEP 6: Show the progress dialog)
-            // START
+
             showCustomProgressDialog() // Used to show the progress dialog
-            // END
+
 
             // Callback methods are executed using the Retrofit callback executor.
             listCall.enqueue(object : Callback<WeatherResponse> {
@@ -158,12 +192,14 @@ class MainActivity : AppCompatActivity() {
 
                     // Check weather the response is success or not.
                     if (response.isSuccess) {
-                        // TODO (STEP 7: Hide the progress dialog)
-                        // START
                         hideProgressDialog() // Hides the progress dialog
                         // END
                         val weatherList: WeatherResponse = response.body()
                         Log.i("Response Result", "$weatherList")
+                        // TODO (STEP 9: Call the setup UI method here and pass the response object as a parameter to it to get the individual values.)
+                        // START
+                        setupUI(weatherList)
+                        // END
                     } else {
                         // If the response is not success then we check the response code.
                         val sc = response.code()
@@ -182,8 +218,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(t: Throwable) {
-                    // TODO (STEP 8: Hide the progress dialog)
-                    // START
                     hideProgressDialog() // Hides the progress dialog
                     // END
                     Log.e("Errorrrrr", t.message.toString())
@@ -241,8 +275,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    // TODO (STEP 5: Create a functions for SHOW and HIDE progress dialog.)
-    // START
+
     /**
      * Method is used to show the Custom Progress Dialog.
      */
