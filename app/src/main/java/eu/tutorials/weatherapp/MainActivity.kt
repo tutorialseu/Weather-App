@@ -14,6 +14,8 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.location.*
@@ -47,7 +49,13 @@ class MainActivity : AppCompatActivity() {
     private val binding:ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-
+    // TODO (STEP 5: Make the latitude and longitude variables global to use it in the menu item selection to refresh the data.)
+    // START
+    // A global variable for Current Latitude
+    private var mLatitude: Double = 0.0
+    // A global variable for Current Longitude
+    private var mLongitude: Double = 0.0
+    // END
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
@@ -104,6 +112,28 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            // TODO (STEP 7: Now finally, make an api call on item selection.)
+            // START
+            R.id.action_refresh -> {
+                getLocationWeatherDetails()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+            // END
+        }
+    }
+    // END
+
+    // TODO (STEP 4: Now add the override methods to load the menu file and perform the selection on item click.)
+    // START
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
     /**
      * Function is used to set the result in the UI elements.
      */
@@ -126,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             binding.tvSunriseTime.text = unixTime(weatherList.sys.sunrise.toLong())
             binding.tvSunsetTime.text = unixTime(weatherList.sys.sunset.toLong())
 
-            //Todo 1  we update the main icon according to the weather
+
             when (weatherList.weather[z].icon) {
                 "01d" -> binding.ivMain.setImageResource(R.drawable.sunny)
                 "02d" -> binding.ivMain.setImageResource(R.drawable.cloud)
@@ -192,13 +222,18 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
-            val latitude = mLastLocation.latitude
-            Log.i("Current Latitude", "$latitude")
+            // TODO (STEP 6: Assign the values to the global variables here
+            //  to use that for api calling. And remove the latitude and
+            //  longitude from the parameter as we can directly use it while
+            //  API calling.)
+            // START
+            mLatitude = mLastLocation.latitude
+            Log.e("Current Latitude", "$mLatitude")
+            mLongitude = mLastLocation.longitude
+            Log.e("Current Longitude", "$mLongitude")
+            // END
 
-            val longitude = mLastLocation.longitude
-            Log.i("Current Longitude", "$longitude")
-
-            getLocationWeatherDetails(latitude, longitude)
+            getLocationWeatherDetails()
         }
     }
 
@@ -206,7 +241,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Function is used to get the weather details of the current location based on the latitude longitude
      */
-    private fun getLocationWeatherDetails(latitude: Double, longitude: Double){
+    private fun getLocationWeatherDetails(){
 
         if (Constants.isNetworkAvailable(this@MainActivity)) {
 
@@ -214,7 +249,7 @@ class MainActivity : AppCompatActivity() {
              * Here we pass the required param in the service
              */
             val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
-                latitude, longitude, Constants.METRIC_UNIT, Constants.API_KEY
+                mLatitude, mLongitude, Constants.METRIC_UNIT, Constants.API_KEY
             )
 
             showCustomProgressDialog() // Used to show the progress dialog

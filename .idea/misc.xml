@@ -4,8 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/close.xml" value="0.19166666666666668" />
+        <entry key="app/src/main/res/drawable/ic_refresh_24dp.xml" value="0.16979166666666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2265625" />
         <entry key="app/src/main/res/layout/dialog_custom_progress.xml" value="0.225" />
+        <entry key="app/src/main/res/menu/menu_main.xml" value="0.14947916666666666" />
       </map>
     </option>
   </component>
