@@ -9,7 +9,6 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
@@ -18,6 +17,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -27,6 +28,8 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import retrofit.Call
 import retrofit.Callback
 import retrofit.Response
@@ -34,12 +37,19 @@ import retrofit.Retrofit
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 // OpenWeather Link : https://openweathermap.org/api
 /**
  * The useful link or some more explanation for this app you can checkout this link :
  * https://medium.com/@sasude9/basic-android-weather-app-6a7c0855caf4
  */
+
 class MainActivity : AppCompatActivity() {
+
+    //Todo 8: initialize the weathelistpref class
+    private val weatherListPref:WeatherListPref by lazy {
+        WeatherListPref(weatherPreferencesStore)
+    }
 
     // A global variable for the Progress Dialog
     private var mProgressDialog: Dialog? = null
@@ -49,13 +59,11 @@ class MainActivity : AppCompatActivity() {
     private val binding:ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-    // TODO (STEP 5: Make the latitude and longitude variables global to use it in the menu item selection to refresh the data.)
-    // START
+
     // A global variable for Current Latitude
     private var mLatitude: Double = 0.0
     // A global variable for Current Longitude
     private var mLongitude: Double = 0.0
-    // END
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
@@ -115,20 +123,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            // TODO (STEP 7: Now finally, make an api call on item selection.)
-            // START
             R.id.action_refresh -> {
                 getLocationWeatherDetails()
                 true
             }
             else -> super.onOptionsItemSelected(item)
-            // END
         }
     }
-    // END
-
-    // TODO (STEP 4: Now add the override methods to load the menu file and perform the selection on item click.)
-    // START
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -222,11 +223,6 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
-            // TODO (STEP 6: Assign the values to the global variables here
-            //  to use that for api calling. And remove the latitude and
-            //  longitude from the parameter as we can directly use it while
-            //  API calling.)
-            // START
             mLatitude = mLastLocation.latitude
             Log.e("Current Latitude", "$mLatitude")
             mLongitude = mLastLocation.longitude
@@ -242,7 +238,6 @@ class MainActivity : AppCompatActivity() {
      * Function is used to get the weather details of the current location based on the latitude longitude
      */
     private fun getLocationWeatherDetails(){
-
         if (Constants.isNetworkAvailable(this@MainActivity)) {
 
             /** An invocation of a Retrofit method that sends a request to a web-server and returns a response.
@@ -268,8 +263,25 @@ class MainActivity : AppCompatActivity() {
                         hideProgressDialog() // Hides the progress dialog
                         // END
                         val weatherList: WeatherResponse = response.body()
-                        Log.i("Response Result", "$weatherList")
-                        setupUI(weatherList)
+                        //Todo 9: update the data store if there is internet connection and fetch from it
+                        //start
+                        weatherListPref.weatherPreference(
+                            weatherList.coord, weatherList.weather,
+                            weatherList.main
+                        )
+                        lifecycleScope.launch {
+                            weatherListPref.updateWeather(
+                                weatherList
+                            )
+                            Log.i("Response Result", "$weatherList")
+
+                                weatherListPref.weatherPreferencesFlow.collect {
+                                    Log.i("Response", "$it")
+                                    setupUI(it)
+                            }
+
+                        }
+                        //end
                     } else {
                         // If the response is not success then we check the response code.
                         val sc = response.code()
@@ -296,6 +308,13 @@ class MainActivity : AppCompatActivity() {
             // END
 
         } else {
+            //Todo 10 if there is no internet then fetch from data store
+            lifecycleScope.launch {
+            weatherListPref.weatherPreferencesFlow.collect {
+                Log.i("Response", "$it")
+                setupUI(it)
+            }
+            }
             Toast.makeText(
                 this@MainActivity,
                 "No internet connection available.",

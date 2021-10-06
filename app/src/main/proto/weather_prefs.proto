@@ -1,0 +1,57 @@
+//Todo 4: create the proto structure
+syntax = "proto3";
+
+option java_package = "eu.tutorials.weatherapp";
+option java_multiple_files = true;
+
+message WeatherUpdate{
+    ProtoWeatherResponse weatherResponse = 1;
+}
+message ProtoWeatherResponse{
+    ProtoCoord coord = 1;
+    repeated ProtoWeather weather =  2; //list
+    string base = 3;
+    ProtoMain main = 4;
+    int32 visibility = 5; //Int
+    ProtoWind wind = 6;
+    ProtoClouds clouds = 7;
+    int32 dt = 8; //Int
+    ProtoSys sys = 9;
+    int32 id = 10; // Int
+    string name = 11;
+    int32 cod = 12;
+}
+message ProtoCoord{
+     double lon = 1;
+     double lat = 2;
+}
+message ProtoWeather{
+    int32 id = 1;
+    string main = 2;
+    string description = 3;
+    string icon = 4;
+}
+message ProtoMain{
+    double temp = 1;
+    double pressure  =2;
+    int32 humidity = 3;
+    double temp_min = 4;
+    double temp_max = 5;
+    double sea_level = 6;
+    double grnd_level = 7;
+}
+message ProtoWind{
+    double speed = 1;
+    int32 deg = 2;
+}
+
+message ProtoClouds{
+    int32 all = 1;
+}
+message ProtoSys{
+    int32 type = 1;
+    double message =2;
+    string country = 3;
+    int64 sunrise = 4; //Long
+    int64 sunset = 5; //Long
+}

@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--TODO (STEP 1: Add the menu resource directory if it is not present in the resource folder and add a menu file along with menu item to it.)-->
-<!--START-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -11,4 +9,3 @@
         android:title="@string/action_refresh"
         app:showAsAction="always" />
 </menu>
-    <!--END-->
