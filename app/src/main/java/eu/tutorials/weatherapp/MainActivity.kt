@@ -265,17 +265,13 @@ class MainActivity : AppCompatActivity() {
                         val weatherList: WeatherResponse = response.body()
                         //Todo 9: update the data store if there is internet connection and fetch from it
                         //start
-                        weatherListPref.weatherPreference(
-                            weatherList.coord, weatherList.weather,
-                            weatherList.main,weatherList.wind,weatherList.clouds,weatherList.sys
-                        )
                         lifecycleScope.launch {
                             weatherListPref.updateWeather(
                                 weatherList
                             )
                             Log.i("Response Result", "$weatherList")
 
-                                weatherListPref.weatherPreferencesFlow.collect {
+                                weatherListPref.weatherPreferenceFlow().collect {
                                     Log.i("Response", "$it")
                                     setupUI(it)
                             }
@@ -310,7 +306,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             //Todo 10 if there is no internet then fetch from data store
             lifecycleScope.launch {
-            weatherListPref.weatherPreferencesFlow.collect {
+            weatherListPref.weatherPreferenceFlow().collect {
                 Log.i("Response", "$it")
                 setupUI(it)
             }
