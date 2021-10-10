@@ -271,7 +271,7 @@ class MainActivity : AppCompatActivity() {
                             )
                             Log.i("Response Result", "$weatherList")
 
-                                weatherListPref.weatherPreferenceFlow().collect {
+                                weatherListPref.weatherPreferenceFlow(weatherList.weather).collect {
                                     Log.i("Response", "$it")
                                     setupUI(it)
                             }
@@ -305,12 +305,7 @@ class MainActivity : AppCompatActivity() {
 
         } else {
             //Todo 10 if there is no internet then fetch from data store
-            lifecycleScope.launch {
-            weatherListPref.weatherPreferenceFlow().collect {
-                Log.i("Response", "$it")
-                setupUI(it)
-            }
-            }
+
             Toast.makeText(
                 this@MainActivity,
                 "No internet connection available.",

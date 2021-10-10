@@ -23,12 +23,11 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
 
     private val TAG = WeatherListPref::class.java.simpleName
 
-    private fun ProtoWeatherResponse.toWeatherResponse(): WeatherResponse {
-        val weatherList = this.getWeather(0)
+    private fun ProtoWeatherResponse.toWeatherResponse(weather:List<Weather>): WeatherResponse {
+
         return WeatherResponse(
             coord =  Coord(this.coord.lon,this.coord.lat),
-            weather = listOf(Weather(weatherList.id,weatherList.main,weatherList.description,
-                weatherList.icon)),
+            weather = weather,
             base = this.base,
             main = Main(this.main.temp,this.main.pressure,this.main.humidity,this.main.tempMin,
                 this.main.tempMax,this.main.seaLevel,this.main.grndLevel),
@@ -57,14 +56,14 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
             .build()
     }
 
-    fun weatherPreferenceFlow() = weatherPreference.data.catch { exception ->
+    fun weatherPreferenceFlow(weather: List<Weather>) = weatherPreference.data.catch { exception ->
         if (exception is IOException) {
             WeatherUpdate.getDefaultInstance().weatherResponse
         } else {
             throw Exception()
         }
     }.map { update ->
-        val item = update.weatherResponse.toWeatherResponse()
+        val item = update.weatherResponse.toWeatherResponse(weather)
         Log.i("Response list","$item")
         item
     }
