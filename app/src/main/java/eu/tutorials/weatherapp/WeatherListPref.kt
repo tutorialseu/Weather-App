@@ -22,17 +22,17 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
     private val TAG = WeatherListPref::class.java.simpleName
 
     private fun ProtoWeatherResponse.toWeatherResponse(coord: Coord,weather: List<Weather>,
-    main:Main): WeatherResponse {
+    main:Main,wind: Wind,clouds: Clouds,sys: Sys): WeatherResponse {
         return WeatherResponse(
             coord =  coord,
             weather = weather,
             base = this.base,
             main = main,
             visibility = this.visibility,
-            wind = Wind(),
-            clouds = Clouds(),
+            wind = wind,
+            clouds = clouds,
             dt = this.dt,
-            sys = Sys(),
+            sys = sys,
             id = this.id,
             name = this.name,
             cod = this.cod
@@ -55,9 +55,10 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
 
     var weatherPreferencesFlow:Flow<WeatherResponse> = emptyFlow()
 
-    fun weatherPreference(cord:Coord,weather: List<Weather>,main:Main){
+    fun weatherPreference(cord:Coord,weather: List<Weather>,main:Main,
+                          wind: Wind,clouds: Clouds,sys: Sys){
         weatherPreferencesFlow = weatherPreference.data.map { update ->
-            val item = update.weatherResponse.toWeatherResponse(cord, weather, main)
+            val item = update.weatherResponse.toWeatherResponse(cord, weather, main,wind, clouds, sys)
             Log.i("Response list","$item")
             item
         }
@@ -68,7 +69,7 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
 
     suspend fun updateWeather(weather: WeatherResponse) {
         weatherPreference.updateData { preferences ->
-            preferences.toBuilder().clearWeatherResponse().setWeatherResponse(weather.toProtoWeatherResponse()).build()
+            preferences.toBuilder().setWeatherResponse(weather.toProtoWeatherResponse()).build()
         }
     }
 

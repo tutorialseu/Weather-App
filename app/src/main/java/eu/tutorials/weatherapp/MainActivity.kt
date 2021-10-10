@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
                         //start
                         weatherListPref.weatherPreference(
                             weatherList.coord, weatherList.weather,
-                            weatherList.main
+                            weatherList.main,weatherList.wind,weatherList.clouds,weatherList.sys
                         )
                         lifecycleScope.launch {
                             weatherListPref.updateWeather(
