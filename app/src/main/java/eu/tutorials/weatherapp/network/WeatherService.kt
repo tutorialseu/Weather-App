@@ -2,9 +2,9 @@ package eu.tutorials.weatherapp.network
 
 
 import eu.tutorials.weatherapp.models.WeatherResponse
-import retrofit.Call
-import retrofit.http.GET
-import retrofit.http.Query
+import retrofit2.Call
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 /**
  * An Interface which defines the HTTP operations Functions.

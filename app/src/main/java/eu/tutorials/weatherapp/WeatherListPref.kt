@@ -23,19 +23,19 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
 
     private val TAG = WeatherListPref::class.java.simpleName
 
-    private fun ProtoWeatherResponse.toWeatherResponse(weather:List<Weather>): WeatherResponse {
+    private fun ProtoWeatherResponse.toWeatherResponse(coord: Coord,weather:List<Weather>,main: Main,
+    wind: Wind,clouds: Clouds,sys: Sys): WeatherResponse {
 
         return WeatherResponse(
-            coord =  Coord(this.coord.lon,this.coord.lat),
+            coord = coord,
             weather = weather,
             base = this.base,
-            main = Main(this.main.temp,this.main.pressure,this.main.humidity,this.main.tempMin,
-                this.main.tempMax,this.main.seaLevel,this.main.grndLevel),
+            main = main,
             visibility = this.visibility,
-            wind = Wind(this.wind.speed,this.wind.deg),
-            clouds = Clouds(this.clouds.all),
+            wind = wind,
+            clouds = clouds,
             dt = this.dt,
-            sys = Sys(this.sys.type,this.sys.message,this.sys.country,this.sys.sunrise,this.sys.sunset),
+            sys = sys,
             id = this.id,
             name = this.name,
             cod = this.cod
@@ -56,14 +56,15 @@ class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
             .build()
     }
 
-    fun weatherPreferenceFlow(weather: List<Weather>) = weatherPreference.data.catch { exception ->
+    fun weatherPreferenceFlow(coord: Coord,weather:List<Weather>,main: Main,
+                              wind: Wind,clouds: Clouds,sys: Sys) = weatherPreference.data.catch { exception ->
         if (exception is IOException) {
             WeatherUpdate.getDefaultInstance().weatherResponse
         } else {
             throw Exception()
         }
     }.map { update ->
-        val item = update.weatherResponse.toWeatherResponse(weather)
+        val item = update.weatherResponse.toWeatherResponse(coord, weather, main, wind, clouds, sys)
         Log.i("Response list","$item")
         item
     }

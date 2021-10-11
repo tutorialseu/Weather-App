@@ -30,10 +30,10 @@ import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import retrofit.Call
-import retrofit.Callback
-import retrofit.Response
-import retrofit.Retrofit
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -254,26 +254,29 @@ class MainActivity : AppCompatActivity() {
             listCall.enqueue(object : Callback<WeatherResponse> {
                 @SuppressLint("SetTextI18n")
                 override fun onResponse(
-                    response: Response<WeatherResponse>,
-                    retrofit: Retrofit
+                    call: Call<WeatherResponse>,
+                    response: Response<WeatherResponse>
                 ) {
 
                     // Check weather the response is success or not.
-                    if (response.isSuccess) {
+                    if (response.isSuccessful) {
                         hideProgressDialog() // Hides the progress dialog
                         // END
-                        val weatherList: WeatherResponse = response.body()
+                        val weatherList: WeatherResponse? = response.body()
                         //Todo 9: update the data store if there is internet connection and fetch from it
                         //start
                         lifecycleScope.launch {
                             weatherListPref.updateWeather(
-                                weatherList
+                                weatherList!!
                             )
                             Log.i("Response Result", "$weatherList")
 
-                                weatherListPref.weatherPreferenceFlow(weatherList.weather).collect {
-                                    Log.i("Response", "$it")
-                                    setupUI(it)
+
+                            weatherListPref.weatherPreferenceFlow(weatherList.coord,weatherList.weather,
+                                weatherList.main,weatherList.wind,weatherList.clouds,weatherList.sys
+                            ).collect {
+                                Log.i("Response", "$it")
+                                setupUI(it)
                             }
 
                         }
@@ -295,7 +298,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(t: Throwable) {
+                override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
                     hideProgressDialog() // Hides the progress dialog
                     // END
                     Log.e("Errorrrrr", t.message.toString())
@@ -304,9 +307,7 @@ class MainActivity : AppCompatActivity() {
             // END
 
         } else {
-            //Todo 10 if there is no internet then fetch from data store
-
-            Toast.makeText(
+                Toast.makeText(
                 this@MainActivity,
                 "No internet connection available.",
                 Toast.LENGTH_SHORT
