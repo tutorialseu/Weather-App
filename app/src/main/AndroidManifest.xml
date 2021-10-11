@@ -11,7 +11,9 @@
     <!-- To access the location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Todo 7 Add the weather app as a value for android:name-->
     <application
+        android:name=".WeatherApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -20,7 +22,7 @@
         android:theme="@style/Theme.WeatherApp">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

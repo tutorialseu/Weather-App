@@ -1,17 +1,18 @@
-package eu.tutorials.weatherapp
+package eu.tutorials.weatherapp.data.proto
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
+import eu.tutorials.weatherapp.WeatherUpdate
 import java.io.InputStream
 import java.io.OutputStream
 
-//Todo 5 create a Serializer class
+
 object WeatherResponseSerializer:Serializer<WeatherUpdate> {
     override val defaultValue: WeatherUpdate
         get() = WeatherUpdate.getDefaultInstance()
 
-    override suspend fun readFrom(input: InputStream): WeatherUpdate{
+    override suspend fun readFrom(input: InputStream): WeatherUpdate {
         try {
             return WeatherUpdate.parseFrom(input)
         } catch (exception: InvalidProtocolBufferException) {

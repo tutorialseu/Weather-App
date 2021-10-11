@@ -1,4 +1,3 @@
-//Todo 4: create the proto structure
 syntax = "proto3";
 
 option java_package = "eu.tutorials.weatherapp";

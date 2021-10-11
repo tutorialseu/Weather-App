@@ -1,15 +1,15 @@
-package eu.tutorials.weatherapp
+package eu.tutorials.weatherapp.data.proto
 
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
+import eu.tutorials.weatherapp.*
 import eu.tutorials.weatherapp.models.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
 
 
-//Todo 6 intialize the datastore
 private const val DATA_STORE_FILE_NAME = "weather_prefs.pb"
 
  val Context.weatherPreferencesStore: DataStore<WeatherUpdate> by dataStore(
@@ -17,14 +17,13 @@ private const val DATA_STORE_FILE_NAME = "weather_prefs.pb"
     serializer = WeatherResponseSerializer
 )
 
-//Todo 7 create a class to prepare the data for MainActivity
 class WeatherListPref(private val weatherPreference:DataStore<WeatherUpdate>) {
 
 
     private val TAG = WeatherListPref::class.java.simpleName
 
-    private fun ProtoWeatherResponse.toWeatherResponse(coord: Coord,weather:List<Weather>,main: Main,
-    wind: Wind,clouds: Clouds,sys: Sys): WeatherResponse {
+    private fun ProtoWeatherResponse.toWeatherResponse(coord: Coord, weather:List<Weather>, main: Main,
+                                                       wind: Wind, clouds: Clouds, sys: Sys): WeatherResponse {
 
         return WeatherResponse(
             coord = coord,

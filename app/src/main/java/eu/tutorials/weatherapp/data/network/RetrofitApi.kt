@@ -1,6 +1,6 @@
-package eu.tutorials.weatherapp.network
+package eu.tutorials.weatherapp.data.network
 
-import eu.tutorials.weatherapp.Constants
+import eu.tutorials.weatherapp.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -9,7 +9,7 @@ object RetrofitApi {
      * Add the built-in converter factory first. This prevents overriding its
      * behavior but also ensures correct behavior when using converters that consume all types.
      */
-    val retrofit: Retrofit = Retrofit.Builder()
+    private val retrofit: Retrofit = Retrofit.Builder()
         // API base URL.
         .baseUrl(Constants.BASE_URL)
         /** Add converter factory for serialization and deserialization of objects. */
