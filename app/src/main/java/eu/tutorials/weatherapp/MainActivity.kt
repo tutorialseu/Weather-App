@@ -27,10 +27,10 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
-import retrofit.Call
-import retrofit.Callback
-import retrofit.Response
-import retrofit.Retrofit
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -49,8 +49,7 @@ class MainActivity : AppCompatActivity() {
     private val binding:ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-    // TODO (STEP 5: Make the latitude and longitude variables global to use it in the menu item selection to refresh the data.)
-    // START
+
     // A global variable for Current Latitude
     private var mLatitude: Double = 0.0
     // A global variable for Current Longitude
@@ -115,8 +114,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            // TODO (STEP 7: Now finally, make an api call on item selection.)
-            // START
+
             R.id.action_refresh -> {
                 getLocationWeatherDetails()
                 true
@@ -127,8 +125,7 @@ class MainActivity : AppCompatActivity() {
     }
     // END
 
-    // TODO (STEP 4: Now add the override methods to load the menu file and perform the selection on item click.)
-    // START
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -222,10 +219,7 @@ class MainActivity : AppCompatActivity() {
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
-            // TODO (STEP 6: Assign the values to the global variables here
-            //  to use that for api calling. And remove the latitude and
-            //  longitude from the parameter as we can directly use it while
-            //  API calling.)
+
             // START
             mLatitude = mLastLocation.latitude
             Log.e("Current Latitude", "$mLatitude")
@@ -259,17 +253,19 @@ class MainActivity : AppCompatActivity() {
             listCall.enqueue(object : Callback<WeatherResponse> {
                 @SuppressLint("SetTextI18n")
                 override fun onResponse(
-                    response: Response<WeatherResponse>,
-                    retrofit: Retrofit
+                    call: Call<WeatherResponse>,
+                    response: Response<WeatherResponse>
                 ) {
 
                     // Check weather the response is success or not.
-                    if (response.isSuccess) {
+                    if (response.isSuccessful) {
                         hideProgressDialog() // Hides the progress dialog
                         // END
-                        val weatherList: WeatherResponse = response.body()
+                        val weatherList: WeatherResponse? = response.body()
                         Log.i("Response Result", "$weatherList")
-                        setupUI(weatherList)
+                        if (weatherList != null) {
+                            setupUI(weatherList)
+                        }
                     } else {
                         // If the response is not success then we check the response code.
                         val sc = response.code()
@@ -287,11 +283,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(t: Throwable) {
+                override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
                     hideProgressDialog() // Hides the progress dialog
                     // END
                     Log.e("Errorrrrr", t.message.toString())
                 }
+
             })
             // END
 

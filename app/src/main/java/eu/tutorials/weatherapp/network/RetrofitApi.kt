@@ -1,8 +1,8 @@
 package eu.tutorials.weatherapp.network
 
 import eu.tutorials.weatherapp.Constants
-import retrofit.GsonConverterFactory
-import retrofit.Retrofit
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitApi {
     /**
