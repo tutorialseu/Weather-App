@@ -17,6 +17,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
@@ -26,9 +27,13 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import eu.tutorials.weatherapp.utils.Constants
 import eu.tutorials.weatherapp.R
+import eu.tutorials.weatherapp.WeatherApp
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.data.network.RetrofitApi
+import eu.tutorials.weatherapp.ui.viewmodel.MainViewModel
+import eu.tutorials.weatherapp.ui.viewmodel.MainViewModelFactory
+import eu.tutorials.weatherapp.utils.Status
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,6 +47,10 @@ import java.util.*
  */
 class MainActivity : AppCompatActivity() {
 
+    //Todo 1: initialize the viewmodel and get the repository from the application class
+    private val viewModel: MainViewModel by viewModels{
+        MainViewModelFactory(application,(application as WeatherApp).repository)
+    }
     // A global variable for the Progress Dialog
     private var mProgressDialog: Dialog? = null
     /**
@@ -56,17 +65,19 @@ class MainActivity : AppCompatActivity() {
     // A global variable for Current Longitude
     private var mLongitude: Double = 0.0
     // END
-    // A fused location client variable which is further used to get the user's current location
-    private lateinit var mFusedLocationClient: FusedLocationProviderClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        //Todo 4 move out the dialog initialization into the oncreate
+        //start
+        mProgressDialog = Dialog(this)
 
-
-        // Initialize the Fused location variable
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        // END
+        /*Set the screen content from a layout resource.
+        The resource will be inflated, adding all top-level views to the screen.*/
+        mProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+        //end
         if (!isLocationEnabled()) {
             Toast.makeText(
                 this,
@@ -87,8 +98,13 @@ class MainActivity : AppCompatActivity() {
                 .withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                         if (report!!.areAllPermissionsGranted()) {
-                            requestLocationData()
 
+                         viewModel.getLocationData.observe(this@MainActivity,{
+                             if (it != null){}
+                             mLongitude = it.longitude
+                             mLatitude = it.latitude
+                         })
+                            getLocationWeatherDetails()
                         }
 
                         if (report.isAnyPermissionPermanentlyDenied) {
@@ -197,102 +213,40 @@ class MainActivity : AppCompatActivity() {
         sdf.timeZone = TimeZone.getDefault()
         return sdf.format(date)
     }
-    // END
-    /**
-     * A function to request the current location. Using the fused location provider client.
-     */
-    @SuppressLint("MissingPermission")
-    private fun requestLocationData() {
 
-        val mLocationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        mFusedLocationClient.requestLocationUpdates(
-            mLocationRequest, mLocationCallback,
-            Looper.myLooper()
-        )
-    }
-
-    /**
-     * A location callback object of fused location provider client where we will get the current location details.
-     */
-    private val mLocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            val mLastLocation: Location = locationResult.lastLocation
-
-            // START
-            mLatitude = mLastLocation.latitude
-            Log.e("Current Latitude", "$mLatitude")
-            mLongitude = mLastLocation.longitude
-            Log.e("Current Longitude", "$mLongitude")
-            // END
-
-            getLocationWeatherDetails()
-        }
-    }
 
 
     /**
      * Function is used to get the weather details of the current location based on the latitude longitude
      */
     private fun getLocationWeatherDetails(){
-
         if (Constants.isNetworkAvailable(this@MainActivity)) {
-
-            /** An invocation of a Retrofit method that sends a request to a web-server and returns a response.
-             * Here we pass the required param in the service
+            //Todo  2 call the fetchWeatherData and pass in the arguments
+            viewModel.fetchWeatherData(mLatitude,mLongitude, Constants.METRIC_UNIT, Constants.API_KEY)
+            /**Todo 3: check for each status, show progress dialog when its loading, hide dialog when
+             * successful and setup ui, hide dialog when there is an error and display the error
              */
-            val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
-                mLatitude, mLongitude, Constants.METRIC_UNIT, Constants.API_KEY
-            )
 
-            showCustomProgressDialog() // Used to show the progress dialog
-
-
-            // Callback methods are executed using the Retrofit callback executor.
-            listCall.enqueue(object : Callback<WeatherResponse> {
-                @SuppressLint("SetTextI18n")
-                override fun onResponse(
-                    call: Call<WeatherResponse>,
-                    response: Response<WeatherResponse>
-                ) {
-
-                    // Check weather the response is success or not.
-                    if (response.isSuccessful) {
-                        hideProgressDialog() // Hides the progress dialog
-                        // END
-                        val weatherList: WeatherResponse? = response.body()
-                        Log.i("Response Result", "$weatherList")
-                        if (weatherList != null) {
-                            setupUI(weatherList)
-                        }
-                    } else {
-                        // If the response is not success then we check the response code.
-                        val sc = response.code()
-                        when (sc) {
-                            400 -> {
-                                Log.e("Error 400", "Bad Request")
-                            }
-                            404 -> {
-                                Log.e("Error 404", "Not Found")
-                            }
-                            else -> {
-                                Log.e("Error", "Generic Error")
-                            }
-                        }
+            viewModel.weatherLiveData.observe(this,{
+                when(it.status){
+                    Status.LOADING ->{
+                        showCustomProgressDialog()
+                    }
+                    Status.SUCCESS->{
+                        hideProgressDialog()
+                        setupUI(it.data!!)
+                    }
+                    Status.ERROR->{
+                        hideProgressDialog()
+                        Toast.makeText(
+                            this@MainActivity,
+                            it.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
-                override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                    hideProgressDialog() // Hides the progress dialog
-                    // END
-                    Log.e("Errorrrrr", t.message.toString())
-                }
-
             })
-            // END
-
         } else {
             Toast.makeText(
                 this@MainActivity,
@@ -348,11 +302,6 @@ class MainActivity : AppCompatActivity() {
      * Method is used to show the Custom Progress Dialog.
      */
     private fun showCustomProgressDialog() {
-        mProgressDialog = Dialog(this)
-
-        /*Set the screen content from a layout resource.
-        The resource will be inflated, adding all top-level views to the screen.*/
-        mProgressDialog?.setContentView(R.layout.dialog_custom_progress)
 
         //Start the dialog and display it on screen.
         mProgressDialog?.show()
