@@ -1,6 +1,6 @@
-package eu.tutorials.weatherapp.network
+package eu.tutorials.weatherapp.data.network
 
-import eu.tutorials.weatherapp.Constants
+import eu.tutorials.weatherapp.utils.Constants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

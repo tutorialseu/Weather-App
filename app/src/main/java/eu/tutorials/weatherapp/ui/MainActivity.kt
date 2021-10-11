@@ -1,4 +1,4 @@
-package eu.tutorials.weatherapp
+package eu.tutorials.weatherapp.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -24,13 +24,14 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import eu.tutorials.weatherapp.utils.Constants
+import eu.tutorials.weatherapp.R
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
-import eu.tutorials.weatherapp.network.RetrofitApi
+import eu.tutorials.weatherapp.data.network.RetrofitApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -1,9 +1,10 @@
-package eu.tutorials.weatherapp
+package eu.tutorials.weatherapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import eu.tutorials.weatherapp.BuildConfig
 
 
 object Constants {

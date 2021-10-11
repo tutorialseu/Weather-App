@@ -1,4 +1,4 @@
-package eu.tutorials.weatherapp.network
+package eu.tutorials.weatherapp.data.network
 
 
 import eu.tutorials.weatherapp.models.WeatherResponse
