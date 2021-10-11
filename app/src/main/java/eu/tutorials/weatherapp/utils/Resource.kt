@@ -1,6 +1,5 @@
 package eu.tutorials.weatherapp.utils
 
-//Todo 2: Create a Resource class for managing weather state like when it is loading,successful or encountered error
 data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
 
     companion object {

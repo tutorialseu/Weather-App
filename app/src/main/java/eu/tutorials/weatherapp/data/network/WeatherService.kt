@@ -10,7 +10,7 @@ import retrofit2.http.Query
  * An Interface which defines the HTTP operations Functions.
  */
 interface WeatherService {
-//Todo 3: replace retrofit call with suspend modifier
+
     @GET("2.5/weather")
    suspend fun getWeather(
         @Query("lat") lat: Double,
