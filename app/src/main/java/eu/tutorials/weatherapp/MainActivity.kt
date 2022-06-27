@@ -19,6 +19,9 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.location.*
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -27,12 +30,17 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
+import org.json.JSONArray
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
 
 // OpenWeather Link : https://openweathermap.org/api
 /**
@@ -62,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
+getWeatherForecast()
         // Initialize the Fused location variable
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         // END
@@ -109,6 +117,8 @@ class MainActivity : AppCompatActivity() {
                 .check()
             // END
         }
+
+
 
     }
 
@@ -366,4 +376,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
     // END
+
+    fun getWeatherForecast() {
+        Executors.newSingleThreadExecutor().execute {
+            var httpURLConnection:HttpURLConnection? = null
+            try {
+                val url =
+                    URL("https://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=da15f28cbf49f1f8a2f030949b85e9a1")
+                 httpURLConnection = url.openConnection() as HttpURLConnection
+                httpURLConnection.setRequestProperty(
+                    "Accept",
+                    "application/json"
+                ) // The format of response we want to get from the server
+                httpURLConnection.requestMethod = "GET"
+                httpURLConnection.doInput = true
+                httpURLConnection.doOutput = false
+                // Check if the connection is successful
+                val responseCode = httpURLConnection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = httpURLConnection.inputStream.bufferedReader()
+                        .use { it.readText() }  // defaults to UTF-8
+
+                    // Convert raw JSON to pretty JSON using GSON library
+                    val json = JsonParser().parse(response).toString()
+                    val jObject = JSONObject(json)
+                    val forecast = jObject.getJSONArray("weather")
+                    val desc = forecast.getJSONObject(0).getString("description")
+                    //Toast.makeText(this, desc, Toast.LENGTH_LONG).show()
+
+                    Log.d("weather response ::", json)
+                } else {
+                    Log.e("HTTPURLCONNECTION_ERROR", responseCode.toString())
+                }
+            }catch (e:Exception){
+                Log.e("error",e.stackTraceToString())
+            } finally {
+                httpURLConnection?.disconnect()
+            }
+        }
+    }
 }
