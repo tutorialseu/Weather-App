@@ -6,9 +6,12 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION_CODES.M
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
@@ -17,7 +20,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -77,47 +83,87 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(intent)
         } else {
+//
+//            Dexter.withContext(this)
+//                .withPermissions(
+//                    Manifest.permission.ACCESS_FINE_LOCATION,
+//                    Manifest.permission.ACCESS_COARSE_LOCATION
+//                )
+//                .withListener(object : MultiplePermissionsListener {
+//                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+//                        if (report!!.areAllPermissionsGranted()) {
+//                            requestLocationData()
+//
+//                        }
+//
+//                        if (report.isAnyPermissionPermanentlyDenied) {
+//                            Toast.makeText(
+//                                this@MainActivity,
+//                                "You have denied location permission. Please allow it is mandatory.",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//                    }
+//
+//                    override fun onPermissionRationaleShouldBeShown(
+//                        permissions: MutableList<PermissionRequest>?,
+//                        token: PermissionToken?
+//                    ) {
+//                        showRationalDialogForPermissions()
+//                    }
+//                }).onSameThread()
+//                .check()
+//            // END
 
-            Dexter.withContext(this)
-                .withPermissions(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-                .withListener(object : MultiplePermissionsListener {
-                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                        if (report!!.areAllPermissionsGranted()) {
-                            requestLocationData()
+            checkLocationPermission()
 
-                        }
-
-                        if (report.isAnyPermissionPermanentlyDenied) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "You have denied location permission. Please allow it is mandatory.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    override fun onPermissionRationaleShouldBeShown(
-                        permissions: MutableList<PermissionRequest>?,
-                        token: PermissionToken?
-                    ) {
-                        showRationalDialogForPermissions()
-                    }
-                }).onSameThread()
-                .check()
-            // END
         }
 
+    }
+
+    @SuppressLint("NewApi")
+    private fun checkLocationPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            )
+                    == PackageManager.PERMISSION_GRANTED -> {
+                requestLocationData()
+            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) -> {
+                // In an educational UI, explain to the user why your app requires this
+                // permission for a specific feature to behave as expected. In this UI,
+                // include a "cancel" or "no thanks" button that allows the user to
+                // continue using your app without granting the permission.
+                showRationalDialogForPermissions()
+            }
+            else -> {
+                // You can directly ask for the permission.
+                // The registered ActivityResultCallback gets the result of this request.
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                )
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
 
             R.id.action_refresh -> {
-                getLocationWeatherDetails()
-                true
+                if (!isLocationEnabled()) {
+                    checkLocationPermission()
+                    }else{
+                    getLocationWeatherDetails()
+                    }
+                  true
             }
             else -> super.onOptionsItemSelected(item)
             // END
@@ -366,4 +412,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
     // END
+
+    val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { if(it[Manifest.permission.ACCESS_COARSE_LOCATION]  == true && it[Manifest.permission.ACCESS_FINE_LOCATION] == true){
+            requestLocationData()
+        }else{
+            showRationalDialogForPermissions()
+        }
+        }
+
 }
