@@ -24,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -33,10 +34,12 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import eu.tutorials.weatherapp.databinding.ActivityMainBinding
 import eu.tutorials.weatherapp.models.WeatherResponse
 import eu.tutorials.weatherapp.network.RetrofitApi
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -288,62 +291,20 @@ class MainActivity : AppCompatActivity() {
             /** An invocation of a Retrofit method that sends a request to a web-server and returns a response.
              * Here we pass the required param in the service
              */
-            val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
-                mLatitude, mLongitude, Constants.METRIC_UNIT, Constants.API_KEY
-            )
 
-            showCustomProgressDialog() // Used to show the progress dialog
-
-
-            // Callback methods are executed using the Retrofit callback executor.
-            listCall.enqueue(object : Callback<WeatherResponse> {
-                @SuppressLint("SetTextI18n")
-                override fun onResponse(
-                    call: Call<WeatherResponse>,
-                    response: Response<WeatherResponse>
-                ) {
-
-                    // Check weather the response is success or not.
-                    if (response.isSuccessful) {
-                        hideProgressDialog() // Hides the progress dialog
-                        // END
-                        val weatherList: WeatherResponse? = response.body()
-                        Log.i("Response Result", "$weatherList")
-                        if (weatherList != null) {
-                            setupUI(weatherList)
-                        }
-                    } else {
-                        // If the response is not success then we check the response code.
-                        val sc = response.code()
-                        when (sc) {
-                            400 -> {
-                                Log.e("Error 400", "Bad Request")
-                            }
-                            404 -> {
-                                Log.e("Error 404", "Not Found")
-                            }
-                            else -> {
-                                Log.e("Error", "Generic Error")
-                            }
-                        }
-                    }
+                showCustomProgressDialog()
+                lifecycleScope.launch {
+                    RetrofitApi.service.getWeather(
+                        mLatitude, mLongitude,Constants.API_KEY
+                    )
                 }
-
-                override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                    hideProgressDialog() // Hides the progress dialog
-                    // END
-                    Log.e("Errorrrrr", t.message.toString())
-                }
-
-            })
-            // END
-
-        } else {
-            Toast.makeText(
-                this@MainActivity,
-                "No internet connection available.",
-                Toast.LENGTH_SHORT
-            ).show()
+                hideProgressDialog()
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    "No internet connection available.",
+                    Toast.LENGTH_SHORT
+                ).show()
         }
         // END
     }
