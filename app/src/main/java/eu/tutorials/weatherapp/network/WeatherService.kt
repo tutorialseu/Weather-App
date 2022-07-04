@@ -16,7 +16,6 @@ interface WeatherService {
     fun getWeather(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("units") units: String?,
         @Query("appid") appid: String?
     ): Call<WeatherResponse>
 }

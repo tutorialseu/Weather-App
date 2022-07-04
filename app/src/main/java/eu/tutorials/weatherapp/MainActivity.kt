@@ -78,44 +78,9 @@ class MainActivity : AppCompatActivity() {
                 "Your location provider is turned off. Please turn it on.",
                 Toast.LENGTH_SHORT
             ).show()
-
-            // This will redirect you to settings from where you need to turn on the location provider.
-            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-            startActivity(intent)
-        } else {
-//
-//            Dexter.withContext(this)
-//                .withPermissions(
-//                    Manifest.permission.ACCESS_FINE_LOCATION,
-//                    Manifest.permission.ACCESS_COARSE_LOCATION
-//                )
-//                .withListener(object : MultiplePermissionsListener {
-//                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-//                        if (report!!.areAllPermissionsGranted()) {
-//                            requestLocationData()
-//
-//                        }
-//
-//                        if (report.isAnyPermissionPermanentlyDenied) {
-//                            Toast.makeText(
-//                                this@MainActivity,
-//                                "You have denied location permission. Please allow it is mandatory.",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                    }
-//
-//                    override fun onPermissionRationaleShouldBeShown(
-//                        permissions: MutableList<PermissionRequest>?,
-//                        token: PermissionToken?
-//                    ) {
-//                        showRationalDialogForPermissions()
-//                    }
-//                }).onSameThread()
-//                .check()
-//            // END
-
             checkLocationPermission()
+        } else {
+         getLocationWeatherDetails()
 
         }
 
@@ -135,16 +100,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) -> {
-                // In an educational UI, explain to the user why your app requires this
-                // permission for a specific feature to behave as expected. In this UI,
-                // include a "cancel" or "no thanks" button that allows the user to
-                // continue using your app without granting the permission.
-                showRationalDialogForPermissions()
+               showRationalDialogForPermissions()
             }
             else -> {
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
-                requestPermissionLauncher.launch(
+              requestPermissionLauncher.launch(
                     arrayOf(
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -289,7 +248,7 @@ class MainActivity : AppCompatActivity() {
              * Here we pass the required param in the service
              */
             val listCall: Call<WeatherResponse> = RetrofitApi.service.getWeather(
-                mLatitude, mLongitude, Constants.METRIC_UNIT, Constants.API_KEY
+                mLatitude, mLongitude, Constants.API_KEY
             )
 
             showCustomProgressDialog() // Used to show the progress dialog
@@ -377,15 +336,13 @@ class MainActivity : AppCompatActivity() {
     /**
      * A function which is used to verify that the location or GPS is enabled or not.
      */
-    private fun isLocationEnabled(): Boolean {
 
-        // This provides access to the system location services.
-        val locationManager: LocationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
+        private fun isLocationEnabled(): Boolean {
+
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
 
 
 
@@ -417,7 +374,7 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { if(it[Manifest.permission.ACCESS_COARSE_LOCATION]  == true && it[Manifest.permission.ACCESS_FINE_LOCATION] == true){
-            requestLocationData()
+          getLocationWeatherDetails()
         }else{
             showRationalDialogForPermissions()
         }
