@@ -291,14 +291,23 @@ class MainActivity : AppCompatActivity() {
             /** An invocation of a Retrofit method that sends a request to a web-server and returns a response.
              * Here we pass the required param in the service
              */
+            showCustomProgressDialog()
+                try {
+                    lifecycleScope.launch {
+                        val weatherList = RetrofitApi.service.getWeather(
+                            mLatitude, mLongitude, Constants.API_KEY
+                        )
+                        Log.i("Response Result", "$weatherList")
+                        if (weatherList != null) {
+                            setupUI(weatherList)
+                        }
+                        hideProgressDialog()
+                    }
 
-                showCustomProgressDialog()
-                lifecycleScope.launch {
-                    RetrofitApi.service.getWeather(
-                        mLatitude, mLongitude,Constants.API_KEY
-                    )
+                }catch (e:Exception){
+                    hideProgressDialog()
+                    Log.e("response error", e.message.toString())
                 }
-                hideProgressDialog()
             } else {
                 Toast.makeText(
                     this@MainActivity,
