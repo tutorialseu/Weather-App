@@ -86,37 +86,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(intent)
         } else {
-//
-//            Dexter.withContext(this)
-//                .withPermissions(
-//                    Manifest.permission.ACCESS_FINE_LOCATION,
-//                    Manifest.permission.ACCESS_COARSE_LOCATION
-//                )
-//                .withListener(object : MultiplePermissionsListener {
-//                    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-//                        if (report!!.areAllPermissionsGranted()) {
-//                            requestLocationData()
-//
-//                        }
-//
-//                        if (report.isAnyPermissionPermanentlyDenied) {
-//                            Toast.makeText(
-//                                this@MainActivity,
-//                                "You have denied location permission. Please allow it is mandatory.",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                    }
-//
-//                    override fun onPermissionRationaleShouldBeShown(
-//                        permissions: MutableList<PermissionRequest>?,
-//                        token: PermissionToken?
-//                    ) {
-//                        showRationalDialogForPermissions()
-//                    }
-//                }).onSameThread()
-//                .check()
-//            // END
 
             checkLocationPermission()
 
